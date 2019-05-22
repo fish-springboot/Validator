@@ -1,6 +1,7 @@
 package com.github.fish56.validator.aop;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -33,7 +34,13 @@ public class Validator {
     private static javax.validation.Validator javaxValidator = Validation.buildDefaultValidatorFactory().getValidator();
     private static SpringValidatorAdapter validator =  new SpringValidatorAdapter(javaxValidator);
 
-    @Around("execution(* com.github.fish56.validator.controller.UserAopController.*(..))")
+    /**
+     * 这个切面是强制校验所有的参数的合法性
+     * @param joinPoint
+     * @return
+     * @throws Throwable
+     */
+    @Around("execution(* com.github.fish56.validator.controller.UserAopController.createUser(..))")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable{
         log.info("正在通过AOP验证字段的合法性");
 
@@ -74,5 +81,8 @@ public class Validator {
 
         return object;
     }
+
+    // 如果想校验所有的被@Valid注解参数的合法性，可以参考
+    // https://stackoverflow.com/questions/21275819
 }
 
