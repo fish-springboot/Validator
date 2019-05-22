@@ -43,10 +43,10 @@ public class UserAopControllerTest extends ValidatorApplicationTests {
     }
 
     @Test
-    public void createUser2() throws Exception{
+    public void createUserError() throws Exception{
         user.setName("xx");
         user.setIsMale(null);
-        ResultMatcher is404 = MockMvcResultMatchers.status().is(404);
+        ResultMatcher is400 = MockMvcResultMatchers.status().is(400);
 
         MockHttpServletRequestBuilder builder =
                 MockMvcRequestBuilders.post("/aop/users")
@@ -55,6 +55,6 @@ public class UserAopControllerTest extends ValidatorApplicationTests {
 
         mockMvc.perform(builder)
                 .andDo(MockMvcResultHandlers.print())
-                .andExpect(is404);
+                .andExpect(is400);
     }
 }

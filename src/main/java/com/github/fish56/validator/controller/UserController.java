@@ -23,7 +23,7 @@ public class UserController {
     @PostMapping
     public Object createUser(@Valid @RequestBody User user, BindingResult bindingResult){
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(404)
+            return ResponseEntity.status(400)
                     .body(JSONObject.toJSONString(
                             bindingResult.getAllErrors()));
         }

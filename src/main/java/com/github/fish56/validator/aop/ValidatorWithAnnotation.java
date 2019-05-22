@@ -1,7 +1,5 @@
 package com.github.fish56.validator.aop;
 
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -13,7 +11,6 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 
-import javax.validation.Valid;
 import javax.validation.Validation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -34,7 +31,7 @@ import java.lang.reflect.Method;
 @Slf4j
 @Aspect
 @Component
-public class Validator {
+public class ValidatorWithAnnotation {
     private static javax.validation.Validator javaxValidator = Validation.buildDefaultValidatorFactory().getValidator();
     private static SpringValidatorAdapter validator =  new SpringValidatorAdapter(javaxValidator);
 
@@ -44,9 +41,9 @@ public class Validator {
      * @return
      * @throws Throwable
      */
-    @Around("execution(* com.github.fish56.validator.controller.UserAopController.createUser(..))")
-    public Object around(ProceedingJoinPoint joinPoint) throws Throwable{
-        log.info("正在通过AOP验证字段的合法性");
+    @Around("execution(* com.github.fish56.validator.controller.UserAopValidateAnnotationController.*(..))")
+    public Object around2(ProceedingJoinPoint joinPoint) throws Throwable{
+        log.info("正在通过AOP验证字段的合法性（只检验被@Valid标注的）");
 
         // 同来存储校验结果
         StringBuilder errorMessage = new StringBuilder();
@@ -54,20 +51,31 @@ public class Validator {
         // 获得方法的参数
         Object[] args = joinPoint.getArgs();
 
-        // 一次校验所有的规则，而不是遇到错误就停止
-        // 对于没有
-        for (int i = 0; i < args.length; i++) {
-            Errors errors = new BeanPropertyBindingResult(args[i], args[i].getClass().getName());
-            validator.validate(args[i], errors);
+        // 或者当前切点的方法对象
+        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        Method method = signature.getMethod();
 
-            // 这样格式美观一点
-            if (errors.hasErrors()){
-                errors.getAllErrors().forEach((objectError) -> {
-                    // 将错误信息输出到errorMessage中
-                    errorMessage.append(objectError.getDefaultMessage() + ", ");
-                });
+        final Annotation[][] paramAnnotations = method.getParameterAnnotations();
+
+        // 做个遍历，看看哪个参数被@Valid标注了
+        for (int i = 0; i < paramAnnotations.length; i++) {
+            for (Annotation a: paramAnnotations[i]) {
+                if (a instanceof ShouldValidate) {
+                    log.info("参数" + i + "被 @Valid注解了");
+                    Errors errors = new BeanPropertyBindingResult(args[i], args[i].getClass().getName());
+                    validator.validate(args[i], errors);
+
+                    // 这样格式美观一点
+                    if (errors.hasErrors()){
+                        errors.getAllErrors().forEach((objectError) -> {
+                            // 将错误信息输出到errorMessage中
+                            errorMessage.append(objectError.getDefaultMessage() + ", ");
+                        });
+                    }
+                }
             }
         }
+
 
         // 有错误的话直接返回
         if (errorMessage.length() > 0) {
