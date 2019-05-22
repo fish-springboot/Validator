@@ -14,6 +14,8 @@ import java.util.Date;
  * Email: 判断是否是字符串
  *
  * message： 出错后的信息
+ *
+ * 一个大坑：Size只检验字符串的长度，但是允许为null！！！服了
  */
 @Data
 public class User {

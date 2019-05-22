@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+/**
+ * 通过@Valid注解来开启参数校验
+ * 需要后面跟一个BindingResult来接受校验结果
+ */
 @RestController
 @RequestMapping("/users")
 public class UserController {

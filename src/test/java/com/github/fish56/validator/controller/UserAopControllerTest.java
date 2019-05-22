@@ -5,7 +5,6 @@ import com.github.fish56.validator.ValidatorApplicationTests;
 import com.github.fish56.validator.entity.User;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.experimental.results.ResultMatchers;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -15,9 +14,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Date;
 
-import static org.junit.Assert.*;
-
-public class UserControllerTest extends ValidatorApplicationTests {
+public class UserAopControllerTest extends ValidatorApplicationTests {
     private User user;
 
     @Before
@@ -36,7 +33,7 @@ public class UserControllerTest extends ValidatorApplicationTests {
     public void createUser() throws Exception{
         ResultMatcher is200 = MockMvcResultMatchers.status().is(200);
         MockHttpServletRequestBuilder builder =
-                MockMvcRequestBuilders.post("/users")
+                MockMvcRequestBuilders.post("/aop/users")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(JSONObject.toJSONString(user));
 
@@ -48,29 +45,11 @@ public class UserControllerTest extends ValidatorApplicationTests {
     @Test
     public void createUser2() throws Exception{
         user.setName("xx");
+        user.setIsMale(null);
         ResultMatcher is404 = MockMvcResultMatchers.status().is(404);
 
         MockHttpServletRequestBuilder builder =
-                MockMvcRequestBuilders.post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(JSONObject.toJSONString(user));
-
-        mockMvc.perform(builder)
-                .andDo(MockMvcResultHandlers.print())
-                .andExpect(is404);
-    }
-
-    /**
-     * 一个大坑：Size只检验字符串的长度，但是允许为null！！！服了
-     * @throws Exception
-     */
-    @Test
-    public void createUser3() throws Exception{
-        user.setName(null);
-        ResultMatcher is404 = MockMvcResultMatchers.status().is(404);
-
-        MockHttpServletRequestBuilder builder =
-                MockMvcRequestBuilders.post("/users")
+                MockMvcRequestBuilders.post("/aop/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JSONObject.toJSONString(user));
 
